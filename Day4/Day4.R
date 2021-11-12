@@ -6,6 +6,8 @@ library(ggplot2)
 library(elevatr)
 library(terra)
 library(twriTemplates)
+library(scico)
+library(rayshader)
 
 
 parks <- st_read("https://raw.githubusercontent.com/imran-5/National_Parks.Geo.JSON/master/US/Polygons/national_parks_polygons.geojson")
@@ -62,16 +64,22 @@ plot(clipped_hexagons, "Elevation")
 
 clipped_hexagons <- st_as_sf(clipped_hexagons)
 
-library(scico)
+
 ggplot(clipped_hexagons) +
   geom_sf(aes(fill = Elevation), color = NA) +
-  scale_fill_scico("Median Elevation [m]", palette = "tofino") +
+  scale_fill_scico("Median Elevation [m]", palette = "lapaz") +
   guides(fill = guide_colorbar(barheight = 10)) +
-  theme_TWRI_print() +
+  #theme_TWRI_print() +
   theme(panel.grid = element_blank(),
-        legend.position = "right",
-        legend.direction = "vertical") -> p1
-library(rayshader)  
+        legend.position = "left",
+        legend.direction = "vertical",
+        panel.background = element_rect(fill = "white", color = NULL),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.title = element_text(size = 8)) +
+  labs(caption = "Yellowstone National Park")-> p1
+p1
+
 ## make 3D ggplot
 plot_gg(p1, 
         multicore = TRUE, 
@@ -83,15 +91,16 @@ plot_gg(p1,
         fov = 0,
         zoom = .5,
         background = "grey80",
-        windowsize = c(1920,1080))
+        windowsize = c(1200,800))
 render_highquality(filename = "Day4/Day4.png",
+                   #light = FALSE,
                    lightdirection = 45, 
                    lightaltitude = 60,
                    lightintensity = 1000,
                    samples = 1000, #lower this to get faster rendering
                    sample_method = "sobol",
                    parallel = TRUE,
-                   width = 1920,
-                   height = 1080,
+                   width = 1200,
+                   height = 800,
                    ground_material = rayrender::diffuse(color = "grey40"),
                    clear = TRUE)
